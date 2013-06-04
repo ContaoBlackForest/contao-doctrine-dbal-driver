@@ -51,7 +51,7 @@ class Statement extends \Database_Statement
 		}
 
 		$this->resResult = null;
-		$this->strQuery  = $strQuery;
+		$this->strQuery  = ltrim($strQuery);
 
 		return $this;
 	}
@@ -197,7 +197,7 @@ class Statement extends \Database_Statement
 	{
 		if (!empty($strQuery))
 		{
-			$this->strQuery = $strQuery;
+			$this->strQuery = ltrim($strQuery);
 		}
 
 		// Make sure there is a query string
