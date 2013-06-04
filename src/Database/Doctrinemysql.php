@@ -13,6 +13,8 @@
  * @filesource
  */
 
+namespace Database;
+
 class Doctrinemysql extends \Contao\Doctrine\Driver\MySQL\Database
 {
 }
