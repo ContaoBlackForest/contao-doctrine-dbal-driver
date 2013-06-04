@@ -21,7 +21,7 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 /**
  * {@inheritdoc}
  */
-class Statement extends \Database_Statement
+class Statement extends \Database\Statement
 {
 	/**
 	 * Connection ID
