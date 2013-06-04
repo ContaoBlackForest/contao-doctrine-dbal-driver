@@ -25,6 +25,7 @@
 	},
 	"autoload":{
 		"psr-0":{
+			"Database": "src/",
 			"Contao\\Doctrine\\Driver": "src/"
 		}
 	},
