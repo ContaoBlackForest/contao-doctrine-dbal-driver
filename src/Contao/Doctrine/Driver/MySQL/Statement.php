@@ -24,6 +24,11 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 class Statement extends \Database\Statement
 {
 	/**
+	 * @var QueryCacheProfile
+	 */
+	protected $queryCacheProfile = null;
+
+	/**
 	 * Connection ID
 	 * @var \Doctrine\DBAL\Connection
 	 */
@@ -39,6 +44,23 @@ class Statement extends \Database\Statement
 	 * @var array
 	 */
 	protected $parameters = array();
+
+	/**
+	 * @param \Doctrine\DBAL\Cache\QueryCacheProfile $queryCacheProfile
+	 */
+	public function setQueryCacheProfile(QueryCacheProfile $queryCacheProfile = null)
+	{
+		$this->queryCacheProfile = $queryCacheProfile;
+		return $this;
+	}
+
+	/**
+	 * @return \Doctrine\DBAL\Cache\QueryCacheProfile
+	 */
+	public function getQueryCacheProfile()
+	{
+		return $this->queryCacheProfile;
+	}
 
 	/**
 	 * {@inheritdoc}
@@ -123,11 +145,6 @@ class Statement extends \Database\Statement
 			$parameters = array_values($parameters[0]);
 		}
 
-		// service container not initialised yet
-		if (!array_key_exists('container', $GLOBALS)) {
-			return $this->executeUncached($parameters);
-		}
-
 		$this->parameters = array_values(
 			array_merge(
 				$this->parameters,
@@ -139,7 +156,7 @@ class Statement extends \Database\Statement
 			$this->strQuery,
 			$this->parameters,
 			array(),
-			$GLOBALS['container']['doctrine.cache.profile.default']
+			$this->queryCacheProfile
 		);
 
 		if (strncasecmp($this->strQuery, 'SELECT', 6) !== 0) {
