@@ -30,11 +30,6 @@
 		}
 	},
 	"extra": {
-		"contao": {
-			"symlinks": {
-				"driver/DB_Doctrinemysql.php": "system/drivers/DB_Doctrinemysql.php"
-			}
-		},
 		"branch-alias": {
 			"dev-contao-2.11": "2.11.x-dev",
 			"dev-contao-3.0": "3.0.x-dev",
