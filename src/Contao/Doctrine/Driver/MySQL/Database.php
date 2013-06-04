@@ -189,7 +189,7 @@ class Database extends \Database
 				$cache = false;
 				break;
 			default:
-				throw new RuntimeException('Invalid doctrine cache impl ' . $this->arrConfig['dbCache']);
+				throw new RuntimeException('Invalid doctrine cache impl ' . $dbCache);
 		}
 
 		if ($cache) {
