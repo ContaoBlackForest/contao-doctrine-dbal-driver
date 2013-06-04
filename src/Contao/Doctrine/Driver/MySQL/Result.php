@@ -20,7 +20,7 @@ use Doctrine\DBAL\Cache\ArrayStatement;
 /**
  * {@inheritdoc}
  */
-class Result extends \Database_Result
+class Result extends \Database\Result
 {
 	/**
 	 * Current result
