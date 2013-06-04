@@ -21,6 +21,18 @@ namespace Contao\Doctrine\Driver\MySQL;
 class Database extends \Database
 {
 	/**
+	 * List tables query
+	 * @var string
+	 */
+	protected $strListTables = "SHOW TABLES FROM `%s`";
+
+	/**
+	 * List fields query
+	 * @var string
+	 */
+	protected $strListFields = "SHOW COLUMNS FROM `%s`";
+
+	/**
 	 * Connection ID
 	 *
 	 * @var \Doctrine\DBAL\Connection
