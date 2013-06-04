@@ -193,6 +193,21 @@ class Statement extends \Database\Statement
 	/**
 	 * {@inheritdoc}
 	 */
+	public function executeCached()
+	{
+		$parameters = func_get_args();
+
+		if (is_array($parameters[0]))
+		{
+			$parameters = array_values($parameters[0]);
+		}
+
+		return $this->executeUncached($parameters);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function query($strQuery = '')
 	{
 		if (!empty($strQuery))
