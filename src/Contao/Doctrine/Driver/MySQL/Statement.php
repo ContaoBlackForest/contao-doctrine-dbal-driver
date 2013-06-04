@@ -47,7 +47,7 @@ class Statement extends \Database\Statement
 	{
 		if (!strlen($strQuery))
 		{
-			throw new Exception('Empty query string');
+			throw new \RuntimeException('Empty query string');
 		}
 
 		$this->resResult = null;
@@ -203,7 +203,7 @@ class Statement extends \Database\Statement
 		// Make sure there is a query string
 		if ($this->strQuery == '')
 		{
-			throw new Exception('Empty query string');
+			throw new \RuntimeException('Empty query string');
 		}
 
 		return $this->execute();
