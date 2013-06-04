@@ -15,6 +15,13 @@
 
 namespace Contao\Doctrine\Driver\MySQL;
 
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\ApcCache;
+use Doctrine\Common\Cache\MemcacheCache;
+use Doctrine\Common\Cache\RedisCache;
+use Doctrine\Common\Cache\XcacheCache;
+use Doctrine\DBAL\Cache\QueryCacheProfile;
+
 /**
  * {@inheritdoc}
  */
@@ -28,11 +35,33 @@ class Database extends \Database
 	protected $resConnection;
 
 	/**
+	 * @var QueryCacheProfile
+	 */
+	protected $queryCacheProfile;
+
+	/**
 	 * @return \Doctrine\DBAL\Connection
 	 */
 	public function getConnection()
 	{
 		return $this->resConnection;
+	}
+
+	/**
+	 * @param \Contao\Doctrine\Driver\MySQL\QueryCacheProfile $queryCacheProfile
+	 */
+	public function setQueryCacheProfile(QueryCacheProfile $queryCacheProfile = null)
+	{
+		$this->queryCacheProfile = $queryCacheProfile;
+		return $this;
+	}
+
+	/**
+	 * @return \Contao\Doctrine\Driver\MySQL\QueryCacheProfile
+	 */
+	public function getQueryCacheProfile()
+	{
+		return $this->queryCacheProfile;
 	}
 
 	/**
@@ -66,6 +95,106 @@ class Database extends \Database
 
 		if (!empty($this->arrConfig['dbPdoDriverOptions'])) {
 			$connectionParameters['driverOptions'] = deserialize($this->arrConfig['dbPdoDriverOptions'], true);
+		}
+
+		if (array_key_exists('dbCache_' . TL_MODE, $this->arrConfig)) {
+			$dbCache = $this->arrConfig['dbCache_' . TL_MODE];
+		}
+		else if (array_key_exists('dbCache', $this->arrConfig)) {
+			$dbCache = $this->arrConfig['dbCache'];
+		}
+		else if (array_key_exists('dbCache_' . TL_MODE, $GLOBALS['TL_CONFIG'])) {
+			$dbCache = $GLOBALS['TL_CONFIG']['dbCache_' . TL_MODE];
+		}
+		else if (array_key_exists('dbCache', $GLOBALS['TL_CONFIG'])) {
+			$dbCache = $GLOBALS['TL_CONFIG']['dbCache'];
+		}
+		else {
+			$dbCache = 'array';
+		}
+
+		if (array_key_exists('dbCacheTTL_' . TL_MODE, $this->arrConfig)) {
+			$dbCacheTTL = $this->arrConfig['dbCacheTTL_' . TL_MODE];
+		}
+		else if (array_key_exists('dbCacheTTL', $this->arrConfig)) {
+			$dbCacheTTL = $this->arrConfig['dbCacheTTL'];
+		}
+		else if (array_key_exists('dbCacheTTL_' . TL_MODE, $GLOBALS['TL_CONFIG'])) {
+			$dbCacheTTL = $GLOBALS['TL_CONFIG']['dbCacheTTL_' . TL_MODE];
+		}
+		else if (array_key_exists('dbCacheTTL', $GLOBALS['TL_CONFIG'])) {
+			$dbCacheTTL = $GLOBALS['TL_CONFIG']['dbCacheTTL'];
+		}
+		else if (TL_MODE == 'BE') {
+			$dbCacheTTL = 1;
+		}
+		else {
+			$dbCacheTTL = 15;
+		}
+
+		if (array_key_exists('dbCacheName_' . TL_MODE, $this->arrConfig)) {
+			$dbCacheName = $this->arrConfig['dbCacheName_' . TL_MODE];
+		}
+		else if (array_key_exists('dbCacheName', $this->arrConfig)) {
+			$dbCacheName = $this->arrConfig['dbCacheName'];
+		}
+		else if (array_key_exists('dbCacheName_' . TL_MODE, $GLOBALS['TL_CONFIG'])) {
+			$dbCacheName = $GLOBALS['TL_CONFIG']['dbCacheName_' . TL_MODE];
+		}
+		else if (array_key_exists('dbCacheName', $GLOBALS['TL_CONFIG'])) {
+			$dbCacheName = $GLOBALS['TL_CONFIG']['dbCacheName'];
+		}
+		else {
+			$dbCacheName = md5(__FILE__);
+		}
+
+		$url = parse_url($dbCache);
+		if (empty($url['scheme'])) {
+			$url['scheme'] = $url['path'];
+		}
+		switch ($url['scheme']) {
+			case 'apc':
+				$cache = new ApcCache();
+				break;
+			case 'xcache':
+				$cache = new XcacheCache();
+				break;
+			case 'memcache':
+				$memcache = new \Memcache();
+				$memcache->connect(
+					empty($url['host']) ? '127.0.0.1' : $url['host'],
+					empty($url['port']) ? null : $url['port']
+				);
+				$cache = new MemcacheCache();
+				$cache->setMemcache($memcache);
+				break;
+			case 'redis':
+				$redis = new \Redis();
+				if (empty($url['path'])) {
+					$redis->connect(
+						empty($url['host']) ? '127.0.0.1' : $url['host'],
+						empty($url['port']) ? 6379 : $url['port']
+					);
+				}
+				else {
+					$redis->connect($url['path']);
+				}
+				$cache = new RedisCache();
+				$cache->setRedis($redis);
+				break;
+			case 'array':
+				$cache = new ArrayCache();
+				break;
+			case '':
+				$cache = false;
+				break;
+			default:
+				throw new RuntimeException('Invalid doctrine cache impl ' . $this->arrConfig['dbCache']);
+		}
+
+		if ($cache) {
+			$this->queryCacheProfile = new QueryCacheProfile($dbCacheTTL, $dbCacheName, $cache);
+			$config->setResultCacheImpl($cache);
 		}
 
 		$this->resConnection = \Doctrine\DBAL\DriverManager::getConnection($connectionParameters, $config);
@@ -237,7 +366,9 @@ class Database extends \Database
 	 */
 	protected function createStatement($resConnection, $blnDisableAutocommit)
 	{
-		return new Statement($resConnection, $blnDisableAutocommit);
+		$statement = new Statement($resConnection, $blnDisableAutocommit);
+		$statement->setQueryCacheProfile($this->queryCacheProfile);
+		return $statement;
 	}
 
 }
