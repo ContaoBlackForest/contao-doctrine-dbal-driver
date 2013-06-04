@@ -3,7 +3,7 @@ Doctrine Database Driver for Contao
 
 To use this database driver, change the driver in your `system/config/localconfig.php`:
 ```php
-$GLOBALS['TL_CONFIG']['dbDriver'] = 'DoctrineMySql';
+$GLOBALS['TL_CONFIG']['dbDriver'] = 'DoctrineMySQL';
 ```
 
 Accessing the doctrine dbal connection

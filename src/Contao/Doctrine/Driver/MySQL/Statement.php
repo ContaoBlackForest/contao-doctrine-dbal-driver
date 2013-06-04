@@ -13,7 +13,7 @@
  * @filesource
  */
 
-namespace Contao\Doctrine\Driver\MySql;
+namespace Contao\Doctrine\Driver\MySQL;
 
 use Doctrine\DBAL\Cache\ArrayStatement;
 use Doctrine\DBAL\Cache\QueryCacheProfile;

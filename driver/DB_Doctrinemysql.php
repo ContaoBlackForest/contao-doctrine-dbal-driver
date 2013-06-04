@@ -13,6 +13,6 @@
  * @filesource
  */
 
-class DB_DoctrineMySql extends \Contao\Doctrine\Driver\MySql\Database
+class DB_DoctrineMySQL extends \Contao\Doctrine\Driver\MySQL\Database
 {
 }
