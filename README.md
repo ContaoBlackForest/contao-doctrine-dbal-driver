@@ -25,16 +25,16 @@ But the caching can be configured with `$GLOBALS['TL_CONFIG']['dbCache']`, `$GLO
 <td>use xcache cache</td>
 </tr>
 <tr>
-<th>memcache://<host>[:<port>]</th>
-<td>use memcache cache on <host>:<port></td>
+<th>memcache://&lt;host&gt;[:&lt;port&gt;]</th>
+<td>use memcache cache on &lt;host&gt;:&lt;port&gt;</td>
 </tr>
 <tr>
-<th>redis://<host>[:<port>]</th>
-<td>use redis cache on <host>:<port></td>
+<th>redis://&lt;host&gt;[:&lt;port&gt;]</th>
+<td>use redis cache on &lt;host&gt;:&lt;port&gt;</td>
 </tr>
 <tr>
-<th>redis://<socket></th>
-<td>use redis cache on <socket> file</td>
+<th>redis://&lt;socket&gt;</th>
+<td>use redis cache on &lt;socket&gt; file</td>
 </tr>
 <tr>
 <th>array</th>
