@@ -21,18 +21,6 @@ namespace Contao\Doctrine\Driver\MySQL;
 class Database extends \Database
 {
 	/**
-	 * List tables query
-	 * @var string
-	 */
-	protected $strListTables = "SHOW TABLES FROM `%s`";
-
-	/**
-	 * List fields query
-	 * @var string
-	 */
-	protected $strListFields = "SHOW COLUMNS FROM `%s`";
-
-	/**
 	 * Connection ID
 	 *
 	 * @var \Doctrine\DBAL\Connection
@@ -89,6 +77,27 @@ class Database extends \Database
 	protected function disconnect()
 	{
 		unset($this->resConnection);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function listTables($databaseName=null, $noCache=false)
+	{
+		if ($databaseName === null)
+		{
+			$databaseName = $this->arrConfig['dbDatabase'];
+		}
+
+		if (!$noCache && isset($this->arrCache[$databaseName]))
+		{
+			return $this->arrCache[$databaseName];
+		}
+
+		$schemaManager = $this->resConnection->getSchemaManager();
+		$this->arrCache[$databaseName] = $schemaManager->listTableNames();
+
+		return $this->arrCache[$databaseName];
 	}
 
 	/**
