@@ -20,7 +20,7 @@
 	},
 	"require":{
 		"php":">=5.3",
-		"contao/core": "2.11.*",
+		"contao/core": "3.0.*",
 		"bit3/contao-doctrine-dbal": "~2.3"
 	},
 	"autoload":{
