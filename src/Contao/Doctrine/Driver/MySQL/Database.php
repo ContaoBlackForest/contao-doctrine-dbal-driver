@@ -43,29 +43,29 @@ class Database extends \Database
 		$config = new \Doctrine\DBAL\Configuration();
 
 		$connectionParameters = array(
-			'dbname'   => $GLOBALS['TL_CONFIG']['dbDatabase'],
-			'user'     => $GLOBALS['TL_CONFIG']['dbUser'],
-			'password' => $GLOBALS['TL_CONFIG']['dbPass'],
-			'host'     => $GLOBALS['TL_CONFIG']['dbHost'],
-			'port'     => $GLOBALS['TL_CONFIG']['dbPort'],
+			'dbname'   => $this->arrConfig['dbDatabase'],
+			'user'     => $this->arrConfig['dbUser'],
+			'password' => $this->arrConfig['dbPass'],
+			'host'     => $this->arrConfig['dbHost'],
+			'port'     => $this->arrConfig['dbPort'],
 		);
 
-		switch (strtolower($GLOBALS['TL_CONFIG']['dbDriver'])) {
+		switch (strtolower($this->arrConfig['dbDriver'])) {
 			case 'mysql':
 			case 'mysqli':
 			case 'doctrinemysql':
 				$connectionParameters['driver']  = 'pdo_mysql';
-				$connectionParameters['charset'] = $GLOBALS['TL_CONFIG']['dbCharset'];
-				if (!empty($GLOBALS['TL_CONFIG']['dbSocket'])) {
-					$connectionParameters['unix_socket'] = $GLOBALS['TL_CONFIG']['dbSocket'];
+				$connectionParameters['charset'] = $this->arrConfig['dbCharset'];
+				if (!empty($this->arrConfig['dbSocket'])) {
+					$connectionParameters['unix_socket'] = $this->arrConfig['dbSocket'];
 				}
 				break;
 			default:
-				throw new \RuntimeException('Database driver ' . $GLOBALS['TL_CONFIG']['dbDriver'] . ' not known by doctrine.');
+				throw new \RuntimeException('Database driver ' . $this->arrConfig['dbDriver'] . ' not known by doctrine.');
 		}
 
-		if (!empty($GLOBALS['TL_CONFIG']['dbPdoDriverOptions'])) {
-			$connectionParameters['driverOptions'] = deserialize($GLOBALS['TL_CONFIG']['dbPdoDriverOptions'], true);
+		if (!empty($this->arrConfig['dbPdoDriverOptions'])) {
+			$connectionParameters['driverOptions'] = deserialize($this->arrConfig['dbPdoDriverOptions'], true);
 		}
 
 		$this->resConnection = \Doctrine\DBAL\DriverManager::getConnection($connectionParameters, $config);
