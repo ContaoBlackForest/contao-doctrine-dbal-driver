@@ -211,19 +211,17 @@ class Database extends \Database
 	/**
 	 * {@inheritdoc}
 	 */
-	public function listTables($databaseName=null, $noCache=false)
+	public function listTables($databaseName = null, $noCache = false)
 	{
-		if ($databaseName === null)
-		{
+		if ($databaseName === null) {
 			$databaseName = $this->arrConfig['dbDatabase'];
 		}
 
-		if (!$noCache && isset($this->arrCache[$databaseName]))
-		{
+		if (!$noCache && isset($this->arrCache[$databaseName])) {
 			return $this->arrCache[$databaseName];
 		}
 
-		$schemaManager = $this->resConnection->getSchemaManager();
+		$schemaManager                 = $this->resConnection->getSchemaManager();
 		$this->arrCache[$databaseName] = $schemaManager->listTableNames();
 
 		return $this->arrCache[$databaseName];
