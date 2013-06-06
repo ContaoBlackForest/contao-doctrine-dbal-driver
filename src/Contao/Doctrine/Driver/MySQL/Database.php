@@ -282,26 +282,141 @@ class Database extends \Database
 
 	protected function list_fields($strTable)
 	{
+		$arrReturn = array();
+		$arrFields = $this->query(sprintf('SHOW COLUMNS FROM `%s`', $strTable))->fetchAllAssoc();
+
+		foreach ($arrFields as $k=>$v)
+		{
+			$arrChunks = preg_split('/(\([^\)]+\))/', $v['Type'], -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+
+			$arrReturn[$k]['name'] = $v['Field'];
+			$arrReturn[$k]['type'] = $arrChunks[0];
+
+			if (!empty($arrChunks[1]))
+			{
+				$arrChunks[1] = str_replace(array('(', ')'), array('', ''), $arrChunks[1]);
+				$arrSubChunks = explode(',', $arrChunks[1]);
+
+				$arrReturn[$k]['length'] = trim($arrSubChunks[0]);
+
+				if (!empty($arrSubChunks[1]))
+				{
+					$arrReturn[$k]['precision'] = trim($arrSubChunks[1]);
+				}
+			}
+
+			if (!empty($arrChunks[2]))
+			{
+				$arrReturn[$k]['attributes'] = trim($arrChunks[2]);
+			}
+
+			if (!empty($v['Key']))
+			{
+				switch ($v['Key'])
+				{
+					case 'PRI':
+						$arrReturn[$k]['index'] = 'PRIMARY';
+						break;
+
+					case 'UNI':
+						$arrReturn[$k]['index'] = 'UNIQUE';
+						break;
+
+					case 'MUL':
+						// Ignore
+						break;
+
+					default:
+						$arrReturn[$k]['index'] = 'KEY';
+						break;
+				}
+			}
+
+			$arrReturn[$k]['null'] = ($v['Null'] == 'YES') ? 'NULL' : 'NOT NULL';
+			$arrReturn[$k]['default'] = $v['Default'];
+			$arrReturn[$k]['extra'] = $v['Extra'];
+		}
+
+		$arrIndexes = $this->query("SHOW INDEXES FROM `$strTable`")->fetchAllAssoc();
+
+		foreach ($arrIndexes as $arrIndex)
+		{
+			$arrReturn[$arrIndex['Key_name']]['name'] = $arrIndex['Key_name'];
+			$arrReturn[$arrIndex['Key_name']]['type'] = 'index';
+			$arrReturn[$arrIndex['Key_name']]['index_fields'][] = $arrIndex['Column_name'];
+			$arrReturn[$arrIndex['Key_name']]['index'] = (($arrIndex['Non_unique'] == 0) ? 'UNIQUE' : 'KEY');
+		}
+
+		return $arrReturn;
+	}
+
+	/**
+	 * TODO: Using the doctrine schema does not work, because some types are not available
+	protected function list_fields($strTable)
+	{
+		$platform      = $this->resConnection->getDatabasePlatform();
 		$schemaManager = $this->resConnection->getSchemaManager();
 		$columns       = $schemaManager->listTableColumns($strTable);
+		$indexes       = $schemaManager->listTableIndexes($strTable);
 		$fields        = array();
+
+		// fill fields
 		foreach ($columns as $column) {
+			$fields[$column->getName()]['name'] = $column->getName();
+
+			$type = $column->getType();
+			$typeSQL = strtolower($type->getSQLDeclaration(array(), $platform));
+			$nativeType = preg_replace('#\(.*\)$#', '', $typeSQL);
+			$fields[$column->getName()]['type'] = $nativeType;
+
+			if ($column->getLength()) {
+				$fields[$column->getName()]['length']    = $column->getLength();
+				$fields[$column->getName()]['precision'] = $column->getPrecision();
+			}
+			else {
+				$fields[$column->getName()]['length'] = $column->getPrecision();
+			}
+
+			$fields[$column->getName()]['attributes'] = $column->getUnsigned() ? 'unsigned' : '';
+			$fields[$column->getName()]['index']      = '';
+			$fields[$column->getName()]['null']       = $column->getNotnull() ? 'NOT NULL' : 'NULL';
+			$fields[$column->getName()]['default']    = $column->getDefault();
+			$fields[$column->getName()]['extra']      = $column->getAutoincrement() ? 'auto_increment' : '';
+		}
+
+		// update field index
+		foreach ($indexes as $index) {
+			$columnNames = $index->getColumns();
+			foreach ($columnNames as $columnName) {
+				if ($index->isPrimary()) {
+					$fields[$columnName]['index'] = 'PRIMARY';
+				}
+				else if ($index->isUnique()) {
+					$fields[$columnName]['index'] = 'UNIQUE';
+				}
+				else if ($index->isSimpleIndex()) {
+					$fields[$columnName]['index'] = 'KEY';
+				}
+			}
+		}
+
+		// make indexes numeric
+		$fields = array_values($fields);
+
+		foreach ($indexes as $index) {
 			$fields[] = array(
-				'name'       => $column->getName(),
-				'type'       => $column
-					->getType()
-					->getName(),
-				'length'     => $column->getLength(),
-				'precision'  => $column->getPrecision(),
-				'attributes' => '',
-				'index'      => '',
-				'null'       => !$column->getNotnull(),
-				'default'    => $column->getDefault(),
-				'extra'      => ''
+				'name'         => $index->getName(),
+				'type'         => 'index',
+				'index_fields' => $index->getUnquotedColumns(),
+				'index'        => $index->isUnique() ? 'UNIQUE' : 'KEY',
 			);
 		}
+
+		var_dump($fields);
+		exit;
 		return $fields;
 	}
+	 */
 
 	/**
 	 * {@inheritdoc}
