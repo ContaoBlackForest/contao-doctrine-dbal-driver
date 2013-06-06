@@ -458,9 +458,9 @@ class Database extends \Database
 		$statement = $this->resConnection->executeQuery(
 			'SHOW TABLE STATUS LIKE ' . $this->resConnection->quote($strTable)
 		);
-		$status    = $statement->fetch(\PDO::FETCH_CLASS);
+		$status    = $statement->fetch(\PDO::FETCH_ASSOC);
 
-		return ($status->Data_length + $status->Index_length);
+		return ($status['Data_length'] + $status['Index_length']);
 	}
 
 	/**
@@ -471,9 +471,9 @@ class Database extends \Database
 		$statement = $this->resConnection->executeQuery(
 			'SHOW TABLE STATUS LIKE ' . $this->resConnection->quote($strTable)
 		);
-		$status    = $statement->fetch(\PDO::FETCH_CLASS);
+		$status    = $statement->fetch(\PDO::FETCH_ASSOC);
 
-		return $status->Auto_increment;
+		return $status['Auto_increment'];
 	}
 
 	/**
