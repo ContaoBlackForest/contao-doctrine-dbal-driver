@@ -159,7 +159,7 @@ class Statement extends \Database_Statement
 			$this->queryCacheProfile
 		);
 
-		if (strncasecmp($this->strQuery, 'SELECT', 6) !== 0) {
+		if (!preg_match('#^(SELECT|SHOW)#iS', $this->strQuery)) {
 			$this->debugQuery();
 			return $this;
 		}
@@ -196,7 +196,7 @@ class Statement extends \Database_Statement
 			$this->parameters
 		);
 
-		if (strncasecmp($this->strQuery, 'SELECT', 6) !== 0) {
+		if (!preg_match('#^(SELECT|SHOW)#iS', $this->strQuery)) {
 			$this->debugQuery();
 			return $this;
 		}
