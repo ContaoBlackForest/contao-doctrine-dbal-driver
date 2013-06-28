@@ -127,7 +127,7 @@ class Database extends \Database
 			$dbCacheName = $GLOBALS['TL_CONFIG']['dbCacheName'];
 		}
 		else {
-			$dbCacheName = md5(__FILE__);
+			$dbCacheName = md5(TL_ROOT);
 		}
 
 		$url = parse_url($dbCache);
