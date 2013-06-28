@@ -197,7 +197,23 @@ class Database extends \Database
 			$config->setResultCacheImpl($cache);
 		}
 
+		// Call hook prepareDoctrineConnection
+		if (array_key_exists('TL_HOOKS', $GLOBALS) && array_key_exists('prepareDoctrineConnection', $GLOBALS['TL_HOOKS']) && is_array($GLOBALS['TL_HOOKS']['prepareDoctrineConnection'])) {
+			foreach ($GLOBALS['TL_HOOKS']['prepareDoctrineConnection'] as $callback) {
+				$object = method_exists($callback[0], 'getInstance') ? call_user_func(array($callback[0], 'getInstance')) : new $callback[0];
+				$object->$callback[1]($connectionParameters, $config);
+			}
+		}
+
 		$this->resConnection = \Doctrine\DBAL\DriverManager::getConnection($connectionParameters, $config);
+
+		// Call hook doctrineConnect
+		if (array_key_exists('TL_HOOKS', $GLOBALS) && array_key_exists('doctrineConnect', $GLOBALS['TL_HOOKS']) && is_array($GLOBALS['TL_HOOKS']['doctrineConnect'])) {
+			foreach ($GLOBALS['TL_HOOKS']['doctrineConnect'] as $callback) {
+				$object = method_exists($callback[0], 'getInstance') ? call_user_func(array($callback[0], 'getInstance')) : new $callback[0];
+				$object->$callback[1]($connectionParameters, $config);
+			}
+		}
 	}
 
 	/**
