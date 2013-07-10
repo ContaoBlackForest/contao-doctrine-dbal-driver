@@ -97,6 +97,8 @@ class Database extends \Database
 			$connectionParameters['driverOptions'] = deserialize($GLOBALS['TL_CONFIG']['dbPdoDriverOptions'], true);
 		}
 
+		$connectionParameters['defaultTableOptions'] = array('collate' => 'utf8_general_ci');
+
 		if (array_key_exists('dbCache_' . TL_MODE, $GLOBALS['TL_CONFIG'])) {
 			$dbCache = $GLOBALS['TL_CONFIG']['dbCache_' . TL_MODE];
 		}
