@@ -21,6 +21,7 @@
 	"require":{
 		"php":">=5.3",
 		"contao/core": "2.11.*",
+		"contao-community-alliance/composer-installer": "*",
 		"doctrine/dbal": "2.4.*"
 	},
 	"autoload":{
@@ -30,7 +31,7 @@
 	},
 	"extra": {
 		"contao": {
-			"symlinks": {
+			"sources": {
 				"driver/DB_Doctrinemysql.php": "system/drivers/DB_Doctrinemysql.php"
 			}
 		},
