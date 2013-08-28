@@ -95,10 +95,6 @@ class Statement extends \Database_Statement
 				case 'array':
 					$value = serialize($value);
 					break;
-
-				default:
-					$value = ($value === null) ? 'NULL' : $value;
-					break;
 			}
 
 			$identifier = '?';
