@@ -63,6 +63,35 @@ class Statement extends \Database_Statement
 	}
 
 	/**
+	 * @param array $parameters
+	 *
+	 * @return array
+	 */
+	public function prepareParameters(array $parameters)
+	{
+		return array_map(
+			array($this, 'prepareParameter'),
+			$parameters
+		);
+	}
+
+	/**
+	 * @param array $parameters
+	 *
+	 * @return array
+	 */
+	public function prepareParameter($parameter)
+	{
+		if (is_array($parameter) or is_object($parameter)) {
+			$parameter = serialize($parameter);
+		}
+		else if (is_bool($parameter)) {
+			$parameter = $parameter ? '1' : '';
+		}
+		return $parameter;
+	}
+
+	/**
 	 * {@inheritdoc}
 	 */
 	public function prepare($strQuery)
@@ -81,21 +110,11 @@ class Statement extends \Database_Statement
 	/**
 	 * {@inheritdoc}
 	 */
-	public function set($arrParams)
+	public function set($parameters)
 	{
 		$keys = array();
-		foreach ($arrParams as $key => $value) {
-			switch (gettype($value))
-			{
-				case 'boolean':
-					$value = ($value === true) ? 1 : 0;
-					break;
-
-				case 'object':
-				case 'array':
-					$value = serialize($value);
-					break;
-			}
+		foreach ($parameters as $key => $value) {
+			$value = $this->prepareParameter($value);
 
 			$identifier = '?';
 			$keys[$this->resConnection->quoteIdentifier($key)] = $identifier;
@@ -140,6 +159,7 @@ class Statement extends \Database_Statement
 		{
 			$parameters = array_values($parameters[0]);
 		}
+		$parameters = $this->prepareParameters($parameters);
 
 		$this->parameters = array_values(
 			array_merge(
@@ -179,6 +199,7 @@ class Statement extends \Database_Statement
 		{
 			$parameters = array_values($parameters[0]);
 		}
+		$parameters = $this->prepareParameters($parameters);
 
 		$this->parameters = array_values(
 			array_merge(
