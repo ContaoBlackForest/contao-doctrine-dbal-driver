@@ -16,6 +16,7 @@
 namespace Contao\Doctrine\Driver\MySQL;
 
 use Doctrine\DBAL\Cache\ArrayStatement;
+use Doctrine\DBAL\Statement;
 
 /**
  * {@inheritdoc}
@@ -28,44 +29,114 @@ class Result extends \Database\Result
 	 */
 	protected $resResult;
 
+	/**
+	 * We need to cache the complete result, because doctrine does not support seeking.
+	 *
+	 * @var array
+	 */
+	protected $arrResult;
+
+	/**
+	 * This is the index of the next fetch'able row.
+	 *
+	 * @var int
+	 */
+	protected $index = 0;
+
+	/**
+	 * @param Statement $resResult
+	 * @param string    $strQuery
+	 */
+	public function __construct($resResult, $strQuery)
+	{
+		parent::__construct($resResult, $strQuery);
+		$this->arrResult = $resResult->fetchAll(\PDO::FETCH_ASSOC);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function fetch_row()
 	{
-		return $this->resResult->fetch(\PDO::FETCH_NUM);
+		if ($this->index >= count($this->arrResult)) {
+			return null;
+		}
+
+		return array_values($this->arrResult[$this->index ++]);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function fetch_assoc()
 	{
-		return $this->resResult->fetch(\PDO::FETCH_ASSOC);
+		if ($this->index >= count($this->arrResult)) {
+			return null;
+		}
+
+		return $this->arrResult[$this->index ++];
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function num_rows()
 	{
-		// the method_exists is for forward compatibility to
-		// https://github.com/doctrine/dbal/pull/329
-		if ($this->resResult instanceof ArrayStatement && !method_exists($this->resResult, 'rowCount')) {
-			// hack to get row count of cached results
-			$class = new \ReflectionClass($this->resResult);
-			$property = $class->getProperty('data');
-			$property->setAccessible(true);
-			return count($property->getValue($this->resResult));
-		}
-		else {
-			return $this->resResult->rowCount();
-		}
+		return count($this->arrResult);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function num_fields()
 	{
 		return $this->resResult->columnCount();
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function fetch_field($intOffset)
 	{
-		return $this->resResult->fetchColumn($intOffset);
+		if ($this->index >= count($this->arrResult)) {
+			return null;
+		}
+
+		$row = $this->fetch_row();
+		return $row[$intOffset];
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
+	protected function data_seek($index)
+	{
+		if ($index < 0)
+		{
+			throw new \OutOfBoundsException("Invalid index $index (must be >= 0)");
+		}
+
+		$intTotal = $this->num_rows();
+
+		if ($intTotal <= 0)
+		{
+			return; // see #6319
+		}
+
+		if ($index >= $intTotal)
+		{
+			throw new \OutOfBoundsException("Invalid index $index (only $intTotal rows in the result set)");
+		}
+
+		$this->index = $index;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function free()
 	{
 		$this->resResult->closeCursor();
+		unset($this->arrResult);
 	}
 }

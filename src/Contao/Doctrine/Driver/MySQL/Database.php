@@ -495,11 +495,29 @@ class Database extends \Database
 	/**
 	 * {@inheritdoc}
 	 */
+	protected function get_uuid()
+	{
+		static $ids;
+
+		if (empty($ids))
+		{
+			$statement = $this->resConnection->executeQuery(
+				implode(' UNION ALL ', array_fill(0, 10, "SELECT UNHEX(REPLACE(UUID(), '-', '')) AS uuid"))
+			);
+
+			$ids = $statement->fetchAll(\PDO::FETCH_COLUMN);
+		}
+
+		return array_pop($ids);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
 	protected function createStatement($resConnection, $blnDisableAutocommit)
 	{
 		$statement = new Statement($resConnection, $blnDisableAutocommit);
 		$statement->setQueryCacheProfile($this->queryCacheProfile);
 		return $statement;
 	}
-
 }
