@@ -1,23 +1,27 @@
 {
-	"name":"bit3/contao-doctrine-dbal-driver",
+	"name":"contaoblackforest/contao-doctrine-dbal-driver",
 	"description":"Database Driver using Doctrine DBAL for Contao Open Source CMS",
 	"keywords":["contao", "database", "driver", "doctrine", "dbal"],
 	"type":"contao-module",
 	"license":"LGPL-3.0+",
 	"authors":[
-		{
-			"name":"Tristan Lins",
-			"email":"tristan.lins@bit3.de",
-			"homepage":"http://bit3.de",
-			"role":"Developer"
-		}
+        {
+          "name": "Sven Baumann",
+          "email": "baumann.sv@gmail.com",
+          "homepage": "",
+          "role": "Developer"
+        },
+        {
+          "name": "Dominik Tomasi",
+          "email": "dominik.tomasi@gmail.com",
+          "homepage": "",
+          "role": "Developer"
+        }
 	],
-	"support":{
-		"email":"info@bit3.de",
-		"issues":"https://github.com/bit3/contao-doctrine/issues",
-		"irc":"irc://irc.freenode.org/contao.dev",
-		"source":"https://github.com/bit3/contao-doctrine"
-	},
+    "support": {
+      "issues": "https://github.com/ContaoBlackForest/contao-doctrine-dbal-driver/issues",
+      "source": "https://github.com/ContaoBlackForest/contao-doctrine-dbal-driver"
+    },
 	"require":{
 		"php":">=5.3",
 		"contao/core": "3.0.*",
